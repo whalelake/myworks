@@ -1,0 +1,95 @@
+# Multi-Agent Configuration
+# Claude Code, Gemini CLI, Codex 에이전트 설정
+
+agents:
+  claude:
+    name: "Claude Code"
+    command: "claude"
+    strengths:
+      - "복잡한 아키텍처 설계"
+      - "코드 리뷰 및 분석"
+      - "문서화"
+      - "버그 분석"
+    best_for:
+      - "planning"
+      - "review"
+      - "documentation"
+      - "debugging"
+    flags:
+      print: "--print"           # 비대화형 모드
+      output_format: "--output-format"  # json, text, stream-json
+      model: "--model"
+    models:
+      default: "sonnet"
+      available: ["haiku", "sonnet", "opus"]
+
+  gemini:
+    name: "Gemini CLI"
+    command: "gemini"
+    strengths:
+      - "빠른 코드 생성"
+      - "멀티모달 처리"
+      - "대용량 컨텍스트"
+    best_for:
+      - "implementation"
+      - "code_generation"
+      - "multimodal"
+    flags:
+      prompt: "-p"              # 프롬프트 직접 전달
+      sandbox: "--sandbox"       # 샌드박스 모드
+    models:
+      default: "gemini-2.5-pro"
+
+  codex:
+    name: "OpenAI Codex CLI"
+    command: "codex"
+    strengths:
+      - "빠른 코드 수정"
+      - "테스트 작성"
+      - "리팩토링"
+    best_for:
+      - "quick_fix"
+      - "testing"
+      - "refactoring"
+    flags:
+      approval: "--approval-mode"  # suggest, auto-edit, full-auto
+      quiet: "-q"
+    models:
+      default: "gpt-4.1"
+
+# 역할별 기본 에이전트 매핑
+role_mapping:
+  architect: "claude"      # 설계/기획
+  implementer: "gemini"    # 구현
+  reviewer: "claude"       # 리뷰
+  tester: "codex"          # 테스트
+  documenter: "claude"     # 문서화
+  debugger: "claude"       # 디버깅
+  refactorer: "codex"      # 리팩토링
+
+# 작업 유형별 추천 에이전트
+task_recommendations:
+  new_feature:
+    primary: "claude"
+    secondary: "gemini"
+    workflow: "pipeline"
+
+  bug_fix:
+    primary: "claude"
+    secondary: "codex"
+    workflow: "role-based"
+
+  code_review:
+    primary: "claude"
+    secondary: "gemini"
+    workflow: "parallel"
+
+  refactoring:
+    primary: "codex"
+    secondary: "claude"
+    workflow: "pipeline"
+
+  testing:
+    primary: "codex"
+    secondary: "gemini"
+    workflow: "parallel"
