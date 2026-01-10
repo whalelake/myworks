@@ -1,1 +1,17 @@
+# OS
 .DS_Store
+
+# Output directories (generated content)
+**/output/
+!**/output/.gitkeep
+
+# Environment files
+.env
+.env.*
+*.env
+
+# API keys and secrets
+*.pem
+*.key
+*credential*
+*secret*
