@@ -1,0 +1,122 @@
+# Workflow Definitions (Gemini-Centric)
+# Gemini-CLI 중심의 오케스트레이션 패턴 정의
+
+workflows:
+  # 새 기능 개발 워크플로우 (Gemini-Centric)
+  feature_development:
+    name: "새 기능 개발 (Gemini 중심)"
+    type: "pipeline"
+    steps:
+      - name: "요구사항 분석 및 설계"
+        agent: "gemini"
+        prompt_template: "design_gemini"
+        output: "01_design.md"
+      - name: "설계 리뷰"
+        agent: "claude"
+        prompt_template: "review_design"
+        input_from: "previous"
+        output: "02_design_review.md"
+      - name: "코드 구현"
+        agent: "gemini"
+        prompt_template: "implement_from_review"
+        input_from: "previous"
+        output: "implementation/"
+      - name: "테스트 작성"
+        agent: "codex"
+        prompt_template: "test"
+        input_from: "step_3"
+        output: "tests/"
+
+  # 코드 리뷰 워크플로우 (병렬, Gemini 중심)
+  code_review:
+    name: "멀티 에이전트 코드 리뷰"
+    type: "parallel"
+    agents:
+      - agent: "gemini"
+        focus: "전체 컨텍스트, 성능, 최적화"
+        prompt_template: "review_performance"
+      - agent: "claude"
+        focus: "아키텍처, 보안, 베스트 프랙티스"
+        prompt_template: "review_architecture"
+      - agent: "codex"
+        focus: "버그 가능성, 엣지 케이스"
+        prompt_template: "review_bugs"
+    merge_strategy: "combine_unique"
+    output: "combined_review.md"
+
+  # 버그 수정 워크플로우 (Gemini-Centric)
+  bug_fix:
+    name: "버그 분석 및 수정 (Gemini 중심)"
+    type: "role-based"
+    roles:
+      analyzer:
+        agent: "gemini"
+        prompt_template: "analyze_bug_gemini"
+        output: "analysis.md"
+      fixer:
+        agent: "codex"
+        prompt_template: "fix_bug"
+        input_from: "analyzer"
+      verifier:
+        agent: "claude"
+        prompt_template: "verify_fix_claude"
+        input_from: "fixer"
+
+  # 리팩토링 워크플로우 (Gemini-Centric)
+  refactoring:
+    name: "코드 리팩토링 (Gemini 중심)"
+    type: "pipeline"
+    steps:
+      - name: "현재 코드 분석"
+        agent: "gemini"
+        prompt_template: "analyze_refactor_gemini"
+        output: "refactor_plan.md"
+      - name: "리팩토링 수행"
+        agent: "claude"
+        prompt_template: "do_refactor"
+        input_from: "previous"
+      - name: "리팩토링 검증"
+        agent: "codex"
+        prompt_template: "verify_refactor_codex"
+        input_from: "previous"
+        output: "refactor_report.md"
+
+  # 문서화 워크플로우 (Gemini-Centric)
+  documentation:
+    name: "코드 문서화"
+    type: "parallel"
+    agents:
+      - agent: "gemini"
+        focus: "초안 작성, 사용 예제"
+        prompt_template: "doc_examples"
+      - agent: "claude"
+        focus: "API 상세, 아키텍처 문서 보완"
+        prompt_template: "doc_api_claude"
+    merge_strategy: "structured"
+    output: "docs/"
+
+  # 빠른 수정 (단일 에이전트)
+  quick_fix:
+    name: "빠른 수정"
+    type: "single"
+    agent: "codex"
+    approval_mode: "auto-edit"
+
+# 병합 전략 정의
+merge_strategies:
+  combine_unique:
+    description: "중복 제거 후 모든 결과 병합"
+    priority_order: ["gemini", "claude", "codex"]
+
+  structured:
+    description: "섹션별로 구조화하여 병합"
+    format: "markdown"
+
+  vote:
+    description: "동일한 제안이 2개 이상일 때 채택"
+    threshold: 2
+
+# 출력 형식
+output_formats:
+  default: "markdown"
+  available: ["markdown", "json", "text"]
